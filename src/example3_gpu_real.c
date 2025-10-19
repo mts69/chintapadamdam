@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
     KLT_TrackingContext tc;
     KLT_FeatureList fl;
     KLT_FeatureTable ft;
-    int nFeatures = 150, nFrames = 10;
+    int nFeatures = 150, nFrames = 914;
     int ncols, nrows;
     int i;
     
