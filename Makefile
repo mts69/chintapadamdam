@@ -159,46 +159,25 @@ pull:
 	git reset --hard origin/$(shell git rev-parse --abbrev-ref HEAD)
 	@echo "✅ Force pull complete!"
 
-# Force push to remote (replaces push script)
+# Force push to remote (works for both local and Colab)
 push:
 	@echo "🧹 Cleaning build files before push..."
 	$(MAKE) clean
 	@echo "📤 Force pushing to repository..."
-	@echo "📁 Loading credentials from .env file..."
-	@if [ -f .env ]; then \
-		echo "✅ Credentials loaded from .env"; \
-	else \
-		echo "❌ .env file not found!"; \
-		echo "Please create .env file with: GIT_USERNAME=username GIT_PASSWORD=token GIT_REPO=user/repo"; \
-		exit 1; \
-	fi
-	@GIT_USERNAME=$$(grep '^GIT_USERNAME=' .env | cut -d'=' -f2); \
-	GIT_PASSWORD=$$(grep '^GIT_PASSWORD=' .env | cut -d'=' -f2); \
-	GIT_REPO=$$(grep '^GIT_REPO=' .env | cut -d'=' -f2); \
-	if [ -z "$$GIT_USERNAME" ] || [ -z "$$GIT_PASSWORD" ] || [ -z "$$GIT_REPO" ]; then \
-		echo "❌ Missing git credentials in .env file!"; \
-		echo "Please check your .env file contains: GIT_USERNAME, GIT_PASSWORD, GIT_REPO"; \
-		exit 1; \
-	fi; \
-	git add .; \
-	git commit -m "update" || echo "No changes to commit"; \
-	echo "🔐 Using username and password authentication..."; \
-	git push https://$$GIT_USERNAME:$$GIT_PASSWORD@github.com/$$GIT_REPO $(shell git rev-parse --abbrev-ref HEAD); \
-	echo "✅ Force push complete!"
-
-# Colab-specific push (for Google Colab environment)
-push-colab:
-	@echo "🧹 Cleaning build files before push..."
-	$(MAKE) clean
-	@echo "📤 Force pushing to repository (Colab mode)..."
-	@echo "📁 Using environment variables for Colab..."
+	@echo "📁 Using environment variables..."
 	@if [ -z "$(GIT_USERNAME)" ] || [ -z "$(GIT_PASSWORD)" ] || [ -z "$(GIT_REPO)" ]; then \
 		echo "❌ Missing git credentials!"; \
-		echo "In Colab, set these variables:"; \
+		echo "Set these environment variables:"; \
+		echo "  export GIT_USERNAME=your_username"; \
+		echo "  export GIT_PASSWORD=your_token"; \
+		echo "  export GIT_REPO=username/repo"; \
+		echo "  make push"; \
+		echo ""; \
+		echo "For Google Colab:"; \
 		echo "  !export GIT_USERNAME=your_username"; \
 		echo "  !export GIT_PASSWORD=your_token"; \
 		echo "  !export GIT_REPO=username/repo"; \
-		echo "  !make push-colab"; \
+		echo "  !make push"; \
 		exit 1; \
 	fi
 	git add .
@@ -217,28 +196,28 @@ help:
 	@echo "  run     - Run GPU example (same as run.py)"
 	@echo "  clean   - Clean build artifacts, executables, libraries, and temp files"
 	@echo "  pull    - Force fetch from remote"
-	@echo "  push       - Force push to remote (uses .env file)"
-	@echo "  push-colab - Force push to remote (for Google Colab)"
-	@echo "  help       - Show this help"
+	@echo "  push   - Force push to remote (works for both local and Colab)"
+	@echo "  help   - Show this help"
 	@echo ""
 	@echo "Examples:"
-	@echo "  make gpu        # Build everything with GPU acceleration"
-	@echo "  make run        # Run the GPU-accelerated KLT algorithm"
-	@echo "  make clean      # Clean all build files"
-	@echo "  make pull       # Force fetch from remote"
-	@echo "  make push       # Force push to remote (uses .env file)"
-	@echo "  make push-colab # Force push to remote (for Google Colab)"
+	@echo "  make gpu    # Build everything with GPU acceleration"
+	@echo "  make run    # Run the GPU-accelerated KLT algorithm"
+	@echo "  make clean  # Clean all build files"
+	@echo "  make pull   # Force fetch from remote"
+	@echo "  make push  # Force push to remote"
 	@echo ""
 	@echo "Git Authentication Setup:"
-	@echo "  Local (using .env file):"
-	@echo "    Create .env file with: GIT_USERNAME=username GIT_PASSWORD=token GIT_REPO=user/repo"
+	@echo "  Local:"
+	@echo "    export GIT_USERNAME=your_username"
+	@echo "    export GIT_PASSWORD=your_token"
+	@echo "    export GIT_REPO=username/repo"
 	@echo "    make push"
 	@echo ""
 	@echo "  Google Colab:"
 	@echo "    !export GIT_USERNAME=your_username"
 	@echo "    !export GIT_PASSWORD=your_token"
 	@echo "    !export GIT_REPO=username/repo"
-	@echo "    !make push-colab"
+	@echo "    !make push"
 
 # Phony targets
-.PHONY: all gpu run clean pull push push-colab help
+.PHONY: all gpu run clean pull push help
