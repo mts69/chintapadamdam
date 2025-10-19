@@ -133,12 +133,18 @@ run: $(EXECUTABLE)
 	@echo "🚀 GPU functions used: convolution + interpolation"
 
 # Clean build artifacts, executables, libraries, and temporary files
-clean:
+clean-all:
 	@echo "🧹 Cleaning build artifacts..."
 	rm -rf $(BUILD_DIR)
 	rm -f $(EXECUTABLE)
 	rm -f *.o *.a
 	rm -f $(OUTPUT_DIR)/feat*.ppm $(OUTPUT_DIR)/features.ft $(OUTPUT_DIR)/features.txt
+	@echo "✅ Clean complete!"
+clean:
+	@echo "🧹 Cleaning build artifacts..."
+	rm -rf $(BUILD_DIR)
+	rm -f $(EXECUTABLE)
+	rm -f *.o *.a
 	@echo "✅ Clean complete!"
 
 # Force fetch from remote (replaces git pull --force)
