@@ -65,6 +65,13 @@ int main(int argc, char **argv) {
     int ncols, nrows;
     int i;
     
+    char cmd[256];
+  sprintf(cmd, "ls %simg*.pgm 2>/dev/null | wc -l", "input/frames");
+  FILE *fp = popen(cmd, "r");
+  fscanf(fp, "%d", &nFrames);
+  pclose(fp);
+
+    
     /* Check number of arguments */
     if (argc != 1)  {
         fprintf(stderr, "Usage: %s\n", argv[0]);
@@ -105,7 +112,7 @@ int main(int argc, char **argv) {
     printf("🔍 DEBUG: About to read first image\n");
     fflush(stdout);
     
-    img1 = pgmReadFile("input/img0.pgm", NULL, &ncols, &nrows);
+    img1 = pgmReadFile("input/frames/img0.pgm", NULL, &ncols, &nrows);
     printf("🔍 DEBUG: First image read completed\n");
     fflush(stdout);
     
@@ -159,7 +166,7 @@ int main(int argc, char **argv) {
         fflush(stdout);
         
         /* Read next image */
-        sprintf(fnamein, "input/img%d.pgm", i);
+        sprintf(fnamein, "input/frames/img%d.pgm", i);
         printf("🔍 DEBUG: Reading image %s\n", fnamein);
         fflush(stdout);
         
