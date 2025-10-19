@@ -61,15 +61,28 @@ int main(int argc, char **argv) {
     KLT_TrackingContext tc;
     KLT_FeatureList fl;
     KLT_FeatureTable ft;
-    int nFeatures = 150, nFrames = 914;
+    int nFeatures = 150, nFrames = 10;  // Default fallback
     int ncols, nrows;
     int i;
     
+    // Get DATA_DIR from environment variable, default to "input"
+    char *data_dir = getenv("DATA_DIR");
+    if (data_dir == NULL) {
+        data_dir = "input";
+    }
+    printf("📁 Using data directory: %s\n", data_dir);
+    
+    // Calculate nFrames dynamically from img*.pgm files
     char cmd[256];
-  sprintf(cmd, "ls %simg*.pgm 2>/dev/null | wc -l", "input/frames");
-  FILE *fp = popen(cmd, "r");
-  fscanf(fp, "%d", &nFrames);
-  pclose(fp);
+    sprintf(cmd, "ls %s/img*.pgm 2>/dev/null | wc -l", data_dir);
+    FILE *fp = popen(cmd, "r");
+    if (fp != NULL) {
+        fscanf(fp, "%d", &nFrames);
+        pclose(fp);
+    } else {
+        printf("⚠️  Could not count frames, using default: %d\n", nFrames);
+    }
+    printf("🔢 Number of frames detected: %d\n", nFrames);
 
     
     /* Check number of arguments */
@@ -112,7 +125,8 @@ int main(int argc, char **argv) {
     printf("🔍 DEBUG: About to read first image\n");
     fflush(stdout);
     
-    img1 = pgmReadFile("input/frames/img0.pgm", NULL, &ncols, &nrows);
+    sprintf(fnamein, "%s/img0.pgm", data_dir);
+    img1 = pgmReadFile(fnamein, NULL, &ncols, &nrows);
     printf("🔍 DEBUG: First image read completed\n");
     fflush(stdout);
     
@@ -166,7 +180,7 @@ int main(int argc, char **argv) {
         fflush(stdout);
         
         /* Read next image */
-        sprintf(fnamein, "input/frames/img%d.pgm", i);
+        sprintf(fnamein, "%s/img%d.pgm", data_dir, i);
         printf("🔍 DEBUG: Reading image %s\n", fnamein);
         fflush(stdout);
         
