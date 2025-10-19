@@ -1,0 +1,41 @@
+######################################################################
+# CUDA Makefile for KLT convolution optimization
+######################################################################
+
+# CUDA compiler
+NVCC = nvcc
+
+# CUDA flags
+NVCCFLAGS = -O3 -std=c++11 -arch=sm_50
+
+# Include directories
+INCLUDES = -I../include
+
+# Source files
+CUDA_SRC = ../src/convolve_cuda.cu
+CUDA_TARGET = convolve_cuda
+
+# Default target
+all: $(CUDA_TARGET)
+
+# Build CUDA executable
+$(CUDA_TARGET): $(CUDA_SRC)
+	$(NVCC) $(NVCCFLAGS) $(INCLUDES) -o $@ $<
+
+# Clean target
+clean:
+	rm -f $(CUDA_TARGET)
+
+# Run the program
+run: $(CUDA_TARGET)
+	./$(CUDA_TARGET)
+
+# Help target
+help:
+	@echo "Available targets:"
+	@echo "  all     - Build the CUDA program"
+	@echo "  clean   - Remove built files"
+	@echo "  run     - Build and run the program"
+	@echo "  help    - Show this help"
+
+.PHONY: all clean run help
