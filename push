@@ -4,6 +4,17 @@ make clean
 
 msg=${1:-"update"}
 echo "📤 Pushing to repository..."
+
+# Check if we're using HTTPS and convert to SSH if needed
+remote_url=$(git remote get-url origin)
+if [[ $remote_url == https://* ]]; then
+    echo "🔄 Converting HTTPS remote to SSH to avoid authentication prompts..."
+    # Convert https://github.com/user/repo.git to git@github.com:user/repo.git
+    ssh_url=$(echo $remote_url | sed 's|https://github.com/|git@github.com:|')
+    git remote set-url origin "$ssh_url"
+    echo "✅ Remote URL updated to SSH: $ssh_url"
+fi
+
 git add .
 git commit -m "$msg"
 git push origin $(git rev-parse --abbrev-ref HEAD)

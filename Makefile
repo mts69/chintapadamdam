@@ -5,6 +5,11 @@
 CC = gcc
 NVCC = nvcc
 
+# Git authentication variables (set these as environment variables)
+# export GIT_USERNAME=your_username
+# export GIT_PASSWORD=your_personal_access_token
+# export GIT_REPO=username/repository_name
+
 # Compiler flags
 CFLAGS = -O3 -DNDEBUG -I./include
 CUDAFLAGS = -O3 -std=c++11 -arch=sm_75 -I./include
@@ -159,10 +164,27 @@ push:
 	@echo "🧹 Cleaning build files before push..."
 	$(MAKE) clean
 	@echo "📤 Force pushing to repository..."
-	git add .
-	git commit -m "update" || echo "No changes to commit"
-	git push --force-with-lease origin $(shell git rev-parse --abbrev-ref HEAD)
-	@echo "✅ Force push complete!"
+	@echo "📁 Loading credentials from .env file..."
+	@if [ -f .env ]; then \
+		echo "✅ Credentials loaded from .env"; \
+	else \
+		echo "❌ .env file not found!"; \
+		echo "Please create .env file with: GIT_USERNAME=username GIT_PASSWORD=token GIT_REPO=user/repo"; \
+		exit 1; \
+	fi
+	@GIT_USERNAME=$$(grep '^GIT_USERNAME=' .env | cut -d'=' -f2); \
+	GIT_PASSWORD=$$(grep '^GIT_PASSWORD=' .env | cut -d'=' -f2); \
+	GIT_REPO=$$(grep '^GIT_REPO=' .env | cut -d'=' -f2); \
+	if [ -z "$$GIT_USERNAME" ] || [ -z "$$GIT_PASSWORD" ] || [ -z "$$GIT_REPO" ]; then \
+		echo "❌ Missing git credentials in .env file!"; \
+		echo "Please check your .env file contains: GIT_USERNAME, GIT_PASSWORD, GIT_REPO"; \
+		exit 1; \
+	fi; \
+	git add .; \
+	git commit -m "update" || echo "No changes to commit"; \
+	echo "🔐 Using username and password authentication..."; \
+	git push https://$$GIT_USERNAME:$$GIT_PASSWORD@github.com/$$GIT_REPO $(shell git rev-parse --abbrev-ref HEAD); \
+	echo "✅ Force push complete!"
 
 # Show help
 help:
@@ -182,7 +204,12 @@ help:
 	@echo "  make run    # Run the GPU-accelerated KLT algorithm"
 	@echo "  make clean  # Clean all build files"
 	@echo "  make pull   # Force fetch from remote"
-	@echo "  make push   # Force push to remote"
+	@echo "  make push   # Force push to remote (requires GIT_USERNAME, GIT_PASSWORD, GIT_REPO)"
+	@echo ""
+	@echo "Git Authentication Setup:"
+	@echo "  export GIT_USERNAME=your_github_username"
+	@echo "  export GIT_PASSWORD=your_personal_access_token"
+	@echo "  export GIT_REPO=username/repository_name"
 
 # Phony targets
 .PHONY: all gpu run clean pull push help
