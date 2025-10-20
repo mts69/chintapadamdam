@@ -1,0 +1,2 @@
+ffmpeg -framerate 30 -i output/cpu/frames/feat%d.ppm -c:v libx264 -pix_fmt yuv420p output/cpu/output.mp4
+ffmpeg -framerate 30 -i output/gpu/frames/feat%d.ppm -c:v libx264 -pix_fmt yuv420p output/gpu/output.mp4
